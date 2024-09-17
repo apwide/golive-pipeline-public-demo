@@ -1,0 +1,51 @@
+on:
+  repository_dispatch:
+    types:
+      - webhook
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+        description: 'Version to deploy'
+      envName:
+        required: true
+        type: string
+        description: 'Name of the environment to deploy'
+      projectId:
+        required: true
+        type: string
+        description: 'Project id'
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: notify-golive-deploy-ongoing
+        uses: apwide/golive-send-environment-info@main
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          goliveToken: ${{ secrets.GOLIVE_TOKEN }}
+          targetEnvironmentName: ${{ inputs.envName }}
+          environmentStatusName: Deploy
+          deploymentIssueKeysFromCommitHistory: false
+
+      - id: simulate-deployment
+        run: sleep 10
+
+      - id: notify-golive-deploy-done
+        uses: apwide/golive-send-environment-info@main
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          goliveToken: ${{ secrets.GOLIVE_TOKEN }}
+          targetEnvironmentName: ${{ inputs.envName }}
+          deploymentVersionName: ${{inputs.version}}
+          environmentStatusName: Up
+          deploymentIssueKeysFromCommitHistory: false
+          deploymentIssuesFromJql: project = "${{inputs.projectId}}" AND fixVersion = "${{inputs.version}}" AND type != "Deployment Request"

@@ -1,0 +1,46 @@
+env:
+  APP: ECP
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/ECP.properties
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: extract-version
+        working-directory: ./apps
+        run: echo "VERSION=$(cat ${{ env.APP }}.properties | grep VERSION | cut -d'=' -f2)" >> $GITHUB_ENV
+
+      - id: tag
+        uses: actions/github-script@v5
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ env.APP}}-${{ env.VERSION }}',
+              sha: context.sha
+            })
+
+      - id: create-update-version
+        uses: apwide/golive-send-release-info@main
+        env:
+          VERSION_NAME: '${{env.APP}} ${{env.VERSION}}'
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          goliveToken: ${{ secrets.GOLIVE_TOKEN }}
+          targetApplicationName: ${{ env.APP }}
+          versionName: '${{ env.VERSION_NAME}}'
+          issueKeysFromCommitHistory: true
+          sendJiraNotification: false
