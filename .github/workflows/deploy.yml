@@ -12,10 +12,6 @@ on:
         required: true
         type: string
         description: 'Name of the environment to deploy'
-      projectId:
-        required: true
-        type: string
-        description: 'Project id'
 
 jobs:
   deploy:
@@ -48,4 +44,4 @@ jobs:
           deploymentVersionName: ${{inputs.version}}
           environmentStatusName: Up
           deploymentIssueKeysFromCommitHistory: false
-          deploymentIssuesFromJql: project = "${{inputs.projectId}}" AND fixVersion = "${{inputs.version}}" AND type != "Environment Change"
+          deploymentIssuesFromJql: fixVersion = "${{inputs.version}}" AND type != "Environment Change"
