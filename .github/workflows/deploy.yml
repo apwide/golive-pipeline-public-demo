@@ -48,4 +48,4 @@ jobs:
           deploymentVersionName: ${{inputs.version}}
           environmentStatusName: Up
           deploymentIssueKeysFromCommitHistory: false
-          deploymentIssuesFromJql: project = "${{inputs.projectId}}" AND fixVersion = "${{inputs.version}}" AND type != "Deployment Request"
+          deploymentIssuesFromJql: project = "${{inputs.projectId}}" AND fixVersion = "${{inputs.version}}" AND type != "Environment Change"
